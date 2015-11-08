@@ -84,14 +84,17 @@ p_insert() {
 		case "$1" in
 		-f) force=1; shift ;;
 		-*) dief 'invalid argument: %s' "$1" ;;
-		*) break ;;
+		*)
+			if [[ -n "$name" ]]; then
+				die 'too many arguments'
+			fi
+			name="$1"
+			;;
 		esac
 	done
 
-	local name="$1"
 	arg_z name "$name"
 	shift
-	arg_done "$@"
 
 	local store pw
 	store="$(load)"
@@ -170,13 +173,12 @@ p_gen() {
 		-f) force=1; shift ;;
 		-*) dief 'invalid option: %s' "$1" ;;
 		*)
-			if [[ -n "$name" ]]; then
-				if [[ -n "$length" ]]; then
-					die 'too many arguments'
-				fi
+			if [[ -z "$name" ]]; then
+				name="$1"
+			elif [[ -z "$length" ]]; then
 				length="$1"
 			else
-				name="$1"
+				die 'too many arguments'
 			fi
 			shift
 			;;
