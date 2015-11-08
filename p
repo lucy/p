@@ -34,6 +34,12 @@ arg_done() {
 	fi
 }
 
+arg_z() {
+	if [[ -z "$2" ]]; then
+		dief 'supply a %s' "$1"
+	fi
+}
+
 readpw() {
 	if [[ -t 0 ]]; then
 		stty -echo
@@ -83,9 +89,7 @@ p_insert() {
 	done
 
 	local name="$1"
-	if [[ -z "$name" ]]; then
-		die 'supply a name'
-	fi
+	arg_z name "$name"
 	shift
 	arg_done "$@"
 
@@ -100,9 +104,7 @@ p_insert() {
 
 p_delete() {
 	local name="$1"
-	if [[ -z "$name" ]]; then
-		die 'supply a name'
-	fi
+	arg_z name "$name"
 	shift
 	arg_done "$@"
 
@@ -116,9 +118,7 @@ p_delete() {
 
 p_print() {
 	local name="$1"
-	if [[ -z "$name" ]]; then
-		die 'supply a name'
-	fi
+	arg_z name "$name"
 	shift
 	arg_done "$@"
 
@@ -145,9 +145,7 @@ p_clip() {
 
 p_edit() {
 	local name="$1"
-	if [[ -z "$name" ]]; then
-		die 'supply a name'
-	fi
+	arg_z name "$name"
 	shift
 	arg_done "$@"
 
@@ -184,12 +182,8 @@ p_gen() {
 			;;
 		esac
 	done
-	if [[ -z "$name" ]]; then
-		die 'supply a name'
-	fi
-	if [[ -z "$length" ]]; then
-		die 'supply a length'
-	fi
+	arg_z name "$name"
+	arg_z length "$length"
 
 	arg=()
 	if ((force)); then
