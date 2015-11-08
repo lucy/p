@@ -216,15 +216,8 @@ while (($#)); do
 	l) shift; p_list "$@"; break ;;
 	p) shift; p_print "$@"; break ;;
 	x) shift; p_clip "$@"; break ;;
-	-h)
-		usage
-		break
-		;;
-	-*)
-		dief 'invalid argument: %s' "$1"
-		;;
-	*)
-		dief 'invalid command: %s' "$1"
-		;;
+	-h) usage; break ;;
+	-*) dief 'invalid argument: %s' "$1" ;;
+	*) dief 'invalid command: %s' "$1" ;;
 	esac
 done
