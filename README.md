@@ -9,10 +9,7 @@
 
 ##### Usage
 ```
-Usage: p [option ...] command [option ...] [argument ...]
-
-toplevel options:
-  -h  display usage
+p [option ...] command [option ...] [argument ...]
 
 commands:
   c           create db
@@ -22,6 +19,9 @@ commands:
   l           list
   p name      print
   x name      add to clipboard
+
+toplevel options:
+  -h  display usage
 
 g options:
   --  pass rest of arguments to pwgen
