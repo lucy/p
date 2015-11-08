@@ -37,7 +37,7 @@ i options:
 * `$P_DIR/store`: the store
 
 ##### Format
-The store is a simple json object with string values encrypted with gpg.
+The store is a simple json object encrypted with gpg.
 ```
 ~/.config/p > p c
 Initialized empty Git repository in ~/.config/p/.git/
