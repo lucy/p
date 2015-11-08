@@ -188,7 +188,10 @@ p_gen() {
 
 usage() {
 	cat >&2 <<-EOF
-	Usage: p command [opt ...] [arg ...]
+	Usage: p [option ...] command [option ...] [argument ...]
+
+	toplevel options:
+	  -h  display usage
 	
 	commands:
 	  c           create db
@@ -199,11 +202,11 @@ usage() {
 	  p name      print
 	  x name      add to clipboard
 	
-	g:
+	g options:
 	  --  pass rest of arguments to pwgen
 	  -f  overwrite
 
-	i:
+	i options:
 	  -f  overwrite
 	EOF
 }
