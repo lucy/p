@@ -90,8 +90,8 @@ p_insert() {
 
 	local store pw
 	store="$(load)"
-	if ((!force)) && get "$name" <<< "$store" &>/dev/null; then
-		dief 'entry %s already exists' "$name"
+	if ((!force)) && get "$name" &>/dev/null <<< "$store"; then
+		die 'entry already exists'
 	fi
 	readpw pw
 	set "$name" "$pw" <<< "$store" | save
