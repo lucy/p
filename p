@@ -28,6 +28,12 @@ die() { log "$@"; exit 1; }
 dief() { logf "$@"; exit 1; }
 print() { printf '%s' "$@"; }
 
+arg_done() {
+	if (($#)); then
+		die 'too many arguments'
+	fi
+}
+
 readpw() {
 	if [[ -t 0 ]]; then
 		stty -echo
@@ -57,9 +63,7 @@ save() {
 
 
 p_create() {
-	if (($#)); then
-		die 'too many arguments'
-	fi
+	arg_done "$@"
 	if [[ -e "$p_store" ]]; then
 		dief 'store already exists at %s' "$p_store"
 		exit 1
@@ -69,24 +73,21 @@ p_create() {
 }
 
 p_insert() {
-	local force=0 name
+	local force=0
 	while (($#)); do
 		case "$1" in
 		-f) force=1; shift ;;
 		-*) dief 'invalid argument: %s' "$1" ;;
-		*)
-			if [[ -n "$name" ]]; then
-				die 'too many arguments'
-			fi
-			name="$1"
-			shift
-			;;
+		*) break ;;
 		esac
 	done
 
+	local name="$1"
 	if [[ -z "$name" ]]; then
 		die 'supply a name'
 	fi
+	shift
+	arg_done "$@"
 
 	local store pw
 	store="$(load)"
@@ -103,9 +104,7 @@ p_delete() {
 		die 'supply a name'
 	fi
 	shift
-	if (($#)); then
-		die 'too many arguments'
-	fi
+	arg_done "$@"
 
 	local store
 	store="$(load)"
@@ -121,9 +120,7 @@ p_print() {
 		die 'supply a name'
 	fi
 	shift
-	if (($#)); then
-		die 'too many arguments'
-	fi
+	arg_done "$@"
 
 	load | get "$name"
 }
@@ -152,9 +149,7 @@ p_edit() {
 		die 'supply a name'
 	fi
 	shift
-	if (($#)); then
-		die 'too many arguments'
-	fi
+	arg_done "$@"
 
 	local store new
 	store="$(load)"
@@ -165,9 +160,7 @@ p_edit() {
 }
 
 p_list() {
-	if (($#)); then
-		die 'too many arguments'
-	fi
+	arg_done "$@"
 	load | jshon -k
 }
 
