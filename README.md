@@ -13,17 +13,17 @@ p command [opt ...] [arg ...]
 
 commands:
   c           create db
+  e name      edit
+  g name len  generate
+  i name      insert
+  l           list
   p name      print
   x name      add to clipboard
-  i name      insert
-  e name      edit
-  l           list
-  g name len  generate
-
-i:
-  -f  overwrite
 
 g:
   -f  overwrite
   --  pass rest of arguments to pwgen
+
+i:
+  -f  overwrite
 ```

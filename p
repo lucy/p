@@ -204,18 +204,18 @@ usage() {
 	
 	commands:
 	  c           create db
+	  e name      edit
+	  g name len  generate
+	  i name      insert
+	  l           list
 	  p name      print
 	  x name      add to clipboard
-	  i name      insert
-	  e name      edit
-	  l           list
-	  g name len  generate
-	
-	i:
-	  -f  overwrite
 	
 	g:
 	  --  pass rest of arguments to pwgen
+	  -f  overwrite
+
+	i:
 	  -f  overwrite
 	EOF
 }
@@ -223,11 +223,11 @@ usage() {
 while (($#)); do
 	case "$1" in
 	c) shift; p_create "$@"; break ;;
+	e) shift; p_edit "$@"; break ;;
+	i) shift; p_insert "$@"; break ;;
+	l) shift; p_list "$@"; break ;;
 	p) shift; p_print "$@"; break ;;
 	x) shift; p_clip "$@"; break ;;
-	i) shift; p_insert "$@"; break ;;
-	e) shift; p_edit "$@"; break ;;
-	l) shift; p_list "$@"; break ;;
 	-h)
 		usage
 		break
