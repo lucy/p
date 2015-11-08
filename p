@@ -29,11 +29,13 @@ dief() { logf "$@"; exit 1; }
 print() { printf '%s' "$@"; }
 
 readpw() {
-	local password
-	stty -echo
-	read -r -p ':' password
-	stty echo
-	print "$password"
+	if [[ -t 0 ]]; then
+		stty -echo
+		read -r -p ':' "$1"
+		stty echo
+	else
+		read -r -p ':' "$1"
+	fi
 }
 
 
