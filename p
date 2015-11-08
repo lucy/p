@@ -85,10 +85,12 @@ p_insert() {
 		-f) force=1; shift ;;
 		-*) dief 'invalid argument: %s' "$1" ;;
 		*)
-			if [[ -n "$name" ]]; then
+			if [[ -z "$name" ]]; then
+				name="$1"
+			else
 				die 'too many arguments'
 			fi
-			name="$1"
+			shift
 			;;
 		esac
 	done
