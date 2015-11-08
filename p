@@ -55,7 +55,6 @@ save() {
 }
 
 
-
 p_create() {
 	if (($#)); then
 		die 'too many arguments'
@@ -71,13 +70,8 @@ p_insert() {
 	local force=0 name
 	while (($#)); do
 		case "$1" in
-		-f)
-			force=1
-			shift
-			;;
-		-*)
-			dief 'invalid argument: %s' "$1"
-			;;
+		-f) force=1; shift ;;
+		-*) dief 'invalid argument: %s' "$1" ;;
 		*)
 			if [[ -n "$name" ]]; then
 				die 'too many arguments'
@@ -161,17 +155,9 @@ p_gen() {
 	local force=0 name length
 	while (($#)); do
 		case "$1" in
-		--)
-			shift
-			break
-			;;
-		-f)
-			force=1
-			shift
-			;;
-		-*)
-			dief 'invalid option: %s' "$1"
-			;;
+		--) shift; break ;;
+		-f) force=1; shift ;;
+		-*) dief 'invalid option: %s' "$1" ;;
 		*)
 			if [[ -n "$name" ]]; then
 				if [[ -n "$length" ]]; then
