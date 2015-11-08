@@ -64,6 +64,7 @@ p_create() {
 		dief 'store already exists at %s' "$p_store"
 		exit 1
 	fi
+	git -C "$p_dir" init
 	init
 }
 
