@@ -2,9 +2,11 @@
 * `P_DIR`: config and store dir (default: `${XDG_CONFIG_DIR:-$HOME/.config}/p`)
 * `P_KEY`: gnupg key id
 * `EDITOR`: used for `p e`
+
 ##### Files
 * `$P_DIR/config`: sourced for environment variables
 * `$P_DIR/store`: simple encrypted json store
+
 ##### Usage
 ```
 p command [opt ...] [arg ...]
