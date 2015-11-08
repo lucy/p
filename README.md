@@ -30,3 +30,8 @@ g options:
 i options:
   -f  overwrite
 ```
+
+##### Migrate (don't!)
+```bash
+( cd "${PASSWORD_STORE:-$HOME/.password-store}/" && find . \( -name .git -o -name .gpg-id \) -prune -o -type f -print ) | sed -e 's/^\.\///' -e 's/\.gpg$//' | while IFS= read -r n; do pass show "$n" | p i "$n"; done
+```
