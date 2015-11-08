@@ -27,11 +27,6 @@ i options:
 * `P_KEY`: gnupg key id
 * `EDITOR`: used for `p e`
 
-##### Migrate (don't!)
-```bash
-( cd "${PASSWORD_STORE:-$HOME/.password-store}/" && find . \( -name .git -o -name .gpg-id \) -prune -o -type f -print ) | sed -e 's/^\.\///' -e 's/\.gpg$//' | while IFS= read -r n; do pass show "$n" | p i "$n"; done
-```
-
 ##### Files
 * `$P_DIR/config`: sourced for environment variables
 * `$P_DIR/store`: the store
@@ -59,6 +54,11 @@ entry:
  "www\/runescape.com": "hunter2",
  "literally anything is fine": "password123"
 }
+```
+
+##### Migrate (don't!)
+```bash
+( cd "${PASSWORD_STORE:-$HOME/.password-store}/" && find . \( -name .git -o -name .gpg-id \) -prune -o -type f -print ) | sed -e 's/^\.\///' -e 's/\.gpg$//' | while IFS= read -r n; do pass show "$n" | p i "$n"; done
 ```
 
 ##### Dependencies
