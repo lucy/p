@@ -34,7 +34,7 @@ i options:
 
 ##### Files
 * `$P_DIR/config`: sourced for environment variables
-* `$P_DIR/store`: store
+* `$P_DIR/store`: the store
 
 ##### Format
 The store is a simple json object with string values encrypted with gpg.
