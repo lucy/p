@@ -168,7 +168,7 @@ p_list() {
 	if (($#)); then
 		die 'too many arguments'
 	fi
-	load | jshon -Q -k
+	load | jshon -k
 }
 
 p_gen() {
