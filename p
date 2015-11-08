@@ -31,8 +31,9 @@ print() { printf '%s' "$@"; }
 readpw() {
 	if [[ -t 0 ]]; then
 		stty -echo
-		read -r -p ':' "$1"
+		read -r -p 'entry: ' "$1"
 		stty echo
+		echo
 	else
 		read -r -p ':' "$1"
 	fi
