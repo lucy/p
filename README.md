@@ -43,3 +43,4 @@ i options:
 * jshon
 * mktemp
 * pwgen
+* xclip
