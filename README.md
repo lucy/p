@@ -1,9 +1,9 @@
-##### Usage
 ```
-p [option ...] command [option ...] [argument ...]
+Usage: p [option ...] command [option ...] [argument ...]
 
 commands:
   c           create db
+  d name      delete
   e name      edit
   g name len  generate
   i name      insert

@@ -97,6 +97,24 @@ p_insert() {
 	set "$name" "$pw" <<< "$store" | save
 }
 
+p_delete() {
+	local name="$1"
+	if [[ -z "$name" ]]; then
+		die 'supply a name'
+	fi
+	shift
+	if (($#)); then
+		die 'too many arguments'
+	fi
+
+	local store
+	store="$(load)"
+	if ! get "$name" <<< "$store" &>/dev/null; then
+		die 'no such entry'
+	fi
+	jshon -Q -d "$name" <<< "$store" | save
+}
+
 p_print() {
 	local name="$1"
 	if [[ -z "$name" ]]; then
@@ -194,6 +212,7 @@ usage() {
 
 	commands:
 	  c           create db
+	  d name      delete
 	  e name      edit
 	  g name len  generate
 	  i name      insert
@@ -216,6 +235,7 @@ usage() {
 while (($#)); do
 	case "$1" in
 	c) shift; p_create "$@"; break ;;
+	d) shift; p_delete "$@"; break ;;
 	e) shift; p_edit "$@"; break ;;
 	i) shift; p_insert "$@"; break ;;
 	l) shift; p_list "$@"; break ;;
