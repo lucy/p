@@ -228,6 +228,7 @@ while (($#)); do
 	c) shift; p_create "$@"; break ;;
 	d) shift; p_delete "$@"; break ;;
 	e) shift; p_edit "$@"; break ;;
+	g) shift; p_gen "$@"; break ;;
 	i) shift; p_insert "$@"; break ;;
 	l) shift; p_list "$@"; break ;;
 	p) shift; p_print "$@"; break ;;
