@@ -8,9 +8,6 @@ p_dir="${P_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/p}"
 p_store="$p_dir/store"
 gpg_opts=(--quiet --yes --batch)
 
-trap 'if [[ -n "$temp_dir" ]]; then rm -rf "$temp_dir"; fi' EXIT
-temp_dir="$(mktemp -d)"
-
 if [[ -r "$p_dir/config" ]]; then
 	. "$p_dir/config"
 fi
@@ -223,7 +220,19 @@ usage() {
 	EOF
 }
 
+
+cleanup() {
+	if [[ -n "$temp_dir" ]]; then
+		rm -rf "$temp_dir" || {
+		log 'something bad happened!'
+		logf 'couldn''t remove temp dir at %s' "$temp_dir"
+	}
+	fi
+}
+trap cleanup EXIT
+
 cmd_init() {
+	temp_dir="$(mktemp -d)"
 	if ((cancel)); then
 		gpg_opts+=(--pinentry-mode cancel)
 	fi
