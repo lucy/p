@@ -9,6 +9,7 @@ p_store="$p_dir/store"
 gpg_opts=(--quiet --yes --batch)
 
 if [[ -r "$p_dir/config" ]]; then
+	# shellcheck disable=SC1090
 	. "$p_dir/config"
 fi
 
@@ -17,7 +18,6 @@ if [[ -n "$P_KEY" ]]; then
 else
 	gpg_opts+=('--default-recipient-self')
 fi
-
 
 log() { printf '%s: %s\n' 'p' "$1" 1>&2; }
 logf() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; }
@@ -51,7 +51,6 @@ save() {
 	git -C "$p_dir" add "$p_store"
 	git -C "$p_dir" commit -m '' --allow-empty-message
 }
-
 
 p_create() {
 	arg_done "$@"
@@ -187,31 +186,30 @@ p_gen() {
 	pwgen -s "$@" "$length" 1 | p_insert "${arg[@]}" "$name"
 }
 
-
 usage() {
-	cat >&2 <<-EOF
-	Usage: p [option ...] command [option ...] [argument ...]
+	cat >&2 <<EOF
+Usage: p [option ...] command [option ...] [argument ...]
 
-	commands:
-	  c           create db
-	  d name      delete
-	  e name      edit
-	  g name len  generate
-	  i name      insert
-	  l           list
-	  p name      print
-	  x name      add to clipboard
+commands:
+  c           create db
+  d name      delete
+  e name      edit
+  g name len  generate
+  i name      insert
+  l           list
+  p name      print
+  x name      add to clipboard
 
-	toplevel options:
-	  -h  display usage
-	
-	g options:
-	  --  pass rest of arguments to pwgen
-	  -f  overwrite
+toplevel options:
+  -h  display usage
 
-	i options:
-	  -f  overwrite
-	EOF
+g options:
+  --  pass rest of arguments to pwgen
+  -f  overwrite
+
+i options:
+  -f  overwrite
+EOF
 }
 
 
