@@ -1,0 +1,55 @@
+#compdef p
+#autoload
+
+_p_entry() {
+	local IFS=$'\n' entries
+	entries=($(p -c l 2>/dev/null | sort))
+	if ((${#entries})); then
+		_values 'entry name' $entries
+	else
+		_message -e entry 'entry name'
+	fi
+}
+
+_p_cmd() {
+	local -a sub
+	sub=(
+		'c:create db'
+		'd:delete'
+		'e:edit'
+		'g:generate'
+		'i:insert'
+		'l:list'
+		'p:print'
+		'x:add to clipboard'
+	)
+	_describe -t commands 'command' sub "$@"
+}
+
+_p() {
+	local state line
+	_arguments \
+		'-h[display usage]' \
+		'1: :_p_cmd' \
+		'*:: :->args'
+
+	if [[ "$state" == args ]]; then
+		case $line[1] in
+		c) _message 'no more arguments' ;;
+		d) _arguments '1:: :_p_entry' ;;
+		e) _arguments '1:: :_p_entry' ;;
+		g) _arguments '1:: :_p_entry' '2::password length' \
+			'-f::overwrite existing entries' \
+			'*::pwgen options' \
+			;;
+		i) _arguments '1:: :_p_entry' \
+			'-f::overwrite existing entries'\
+			;;
+		l) ;;
+		p) _arguments '1:: :_p_entry' ;;
+		x) _arguments '1:: :_p_entry' ;;
+		esac
+	fi
+}
+
+_p
