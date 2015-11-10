@@ -223,16 +223,24 @@ usage() {
 	EOF
 }
 
+cmd_init() {
+	if ((cancel)); then
+		gpg_opts+=(--pinentry-mode cancel)
+	fi
+}
+
+cancel=0
 while (($#)); do
 	case "$1" in
-	c) shift; p_create "$@"; break ;;
-	d) shift; p_delete "$@"; break ;;
-	e) shift; p_edit "$@"; break ;;
-	g) shift; p_gen "$@"; break ;;
-	i) shift; p_insert "$@"; break ;;
-	l) shift; p_list "$@"; break ;;
-	p) shift; p_print "$@"; break ;;
-	x) shift; p_clip "$@"; break ;;
+	c) shift; cmd_init; p_create "$@"; break ;;
+	d) shift; cmd_init; p_delete "$@"; break ;;
+	e) shift; cmd_init; p_edit "$@"; break ;;
+	g) shift; cmd_init; p_gen "$@"; break ;;
+	i) shift; cmd_init; p_insert "$@"; break ;;
+	l) shift; cmd_init; p_list "$@"; break ;;
+	p) shift; cmd_init; p_print "$@"; break ;;
+	x) shift; cmd_init; p_clip "$@"; break ;;
+	-c) cancel=1; shift ;;
 	-h) usage; break ;;
 	-*) dief 'invalid argument: %s' "$1" ;;
 	*) dief 'invalid command: %s' "$1" ;;
