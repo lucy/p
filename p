@@ -37,18 +37,6 @@ arg_z() {
 	fi
 }
 
-readpw() {
-	if [[ -t 0 ]]; then
-		stty -echo
-		read -r -p 'entry: ' "$1"
-		stty echo
-		echo
-	else
-		read -r -p ':' "$1"
-	fi
-}
-
-
 init() { jshon -Q -n object | save; }
 get() { jshon -Q -e "$1" -u; }
 set() { jshon -Q -s "$2" -i "$1"; }
@@ -93,14 +81,20 @@ p_insert() {
 	done
 
 	arg_z name "$name"
-	shift
 
 	local store pw
 	store="$(load)"
 	if ((!force)) && get "$name" &>/dev/null <<< "$store"; then
 		die 'entry already exists'
 	fi
-	readpw pw
+	if [[ -t 0 ]]; then
+		stty -echo
+		read -r -p 'entry: ' pw
+		stty echo
+		echo
+	else
+		pw="$(cat)"
+	fi
 	set "$name" "$pw" <<< "$store" | save
 }
 
