@@ -35,7 +35,7 @@ i options:
 # Format
 The store is a simple JSON object encrypted with gpg.
 
-Initialise the store:
+#### Initialise the store:
 ```
 ~/.config/p > p c
 Initialized empty Git repository in ~/.config/p/.git/
@@ -43,7 +43,8 @@ Initialized empty Git repository in ~/.config/p/.git/
  1 file changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 store
  ```
-Insert entries:
+
+#### Insert entries:
 ```
 ~/.config/p master > p i www/runescape.com
 entry:
@@ -57,7 +58,8 @@ entry:
  1 file changed, 0 insertions(+), 0 deletions(-)
  rewrite store (100%)
 ```
-JSON dump:
+
+#### JSON dump:
 ```json
 ~/.config/p master > gpg -qd store
 {
