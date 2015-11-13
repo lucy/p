@@ -24,6 +24,7 @@ logf() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; }
 die() { log "$@"; exit 1; }
 dief() { logf "$@"; exit 1; }
 print() { printf '%s' "$@"; }
+git_p() { git -C "$p_dir" "$@"; }
 
 arg_done() {
 	if (($#)); then
@@ -48,8 +49,8 @@ load() {
 save() {
 	gpg2 "${gpg_opts[@]}" --encrypt --output "$temp_dir/store"
 	mv "$temp_dir/store" "$p_store"
-	git -C "$p_dir" add "$p_store"
-	git -C "$p_dir" commit -m '' --allow-empty-message
+	git_p add "$p_store"
+	git_p commit -m '' --allow-empty-message
 }
 
 p_create() {
@@ -58,7 +59,7 @@ p_create() {
 		dief 'store already exists at %s' "$p_store"
 		exit 1
 	fi
-	git -C "$p_dir" init
+	git_p init
 	init
 }
 
