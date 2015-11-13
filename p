@@ -121,24 +121,6 @@ p_print() {
 	load | get "$name"
 }
 
-p_clip() {
-	local pw
-	pw="$(p_print "$@")"
-	local argv0="p sleeping on $DISPLAY"
-	pkill -f "^$argv0$" || true
-	local before
-	before="$(xclip -o -selection clipboard | base64)"
-	print "$pw" | xclip -selection clipboard
-	(
-		( exec -a "$argv0" sleep 30 )
-		local now
-		now="$(xclip -o -selection clipboard)"
-		if [[ "$now" == "$(print "$pw" | base64)" ]]; then
-			print "$before" | base64 -d | xsel -b
-		fi
-	) 2>/dev/null & disown
-}
-
 p_edit() {
 	local name="$1"
 	arg_z name "$name"
@@ -199,7 +181,6 @@ commands:
   i name      insert
   l           list
   p name      print
-  x name      add to clipboard
 
 toplevel options:
   -h  display usage
@@ -241,7 +222,6 @@ while (($#)); do
 	i) shift; cmd_init; p_insert "$@"; break ;;
 	l) shift; cmd_init; p_list "$@"; break ;;
 	p) shift; cmd_init; p_print "$@"; break ;;
-	x) shift; cmd_init; p_clip "$@"; break ;;
 	-c) cancel=1; shift ;;
 	-h) usage; break ;;
 	-*) dief 'invalid argument: %s' "$1" ;;

@@ -47,7 +47,6 @@ _p() {
 			;;
 		l) ;;
 		p) _arguments '1:: :_p_entry' ;;
-		x) _arguments '1:: :_p_entry' ;;
 		esac
 	fi
 }
