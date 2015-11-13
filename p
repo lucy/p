@@ -39,8 +39,9 @@ arg_z() {
 }
 
 init() { jshon -Q -n object | save; }
-get() { jshon -Q -e "$1" -u; }
-set() { jshon -Q -s "$2" -i "$1"; }
+j_get() { jshon -Q -e "$1" -u; }
+j_set() { jshon -Q -s "$2" -i "$1"; }
+j_del() { jshon -Q -d "$1"; }
 
 load() {
 	gpg2 "${gpg_opts[@]}" --decrypt "$p_store"
@@ -70,7 +71,7 @@ p_insert() {
 
 	local store pw
 	store="$(load)"
-	if get "$name" >/dev/null <<< "$store"; then
+	if j_get "$name" >/dev/null <<< "$store"; then
 		die 'entry already exists'
 	fi
 	if [[ -t 0 ]]; then
@@ -81,7 +82,7 @@ p_insert() {
 	else
 		pw="$(cat)"
 	fi
-	set "$name" "$pw" <<< "$store" | save
+	j_set "$name" "$pw" <<< "$store" | save
 }
 
 p_delete() {
@@ -92,10 +93,39 @@ p_delete() {
 
 	local store
 	store="$(load)"
-	if ! get "$name" <<< "$store" &>/dev/null; then
+	if ! j_get "$name" <<< "$store" &>/dev/null; then
 		die 'no such entry'
 	fi
-	jshon -Q -d "$name" <<< "$store" | save
+	store="$(j_del "$name" <<< "$store")"
+	save <<< "$store"
+}
+
+p_mv() {
+	local from="$1" to="$2"
+	arg_z from "$from"
+	arg_z to "$to"
+	shift 2
+	arg_done "$@"
+
+	local store pw
+	store="$(load)"
+	if j_get "$to" >/dev/null <<< "$store"; then
+		die 'to already exists'
+	fi
+	pw="$(j_get "$from" <<< "$store")"
+	j_del "$from" <<< "$store" | j_set "$to" "$pw" | save
+}
+
+p_diff() {
+	local from="$1" to="$2"
+	arg_z from\ commit "$from"
+	arg_z to\ commit "$to"
+	shift 2
+	arg_done "$@"
+	git_p cat-file blob "$from:store" | gpg2 "${gpg_opts[@]}" --decrypt > "$temp_dir/from"
+	git_p cat-file blob "$to:store" | gpg2 "${gpg_opts[@]}" --decrypt > "$temp_dir/to"
+	git --no-pager diff --color=auto --no-ext-diff --no-index \
+		"$temp_dir/from" "$temp_dir/to"
 }
 
 p_print() {
@@ -104,7 +134,7 @@ p_print() {
 	shift
 	arg_done "$@"
 
-	load | get "$name"
+	load | j_get "$name"
 }
 
 p_edit() {
@@ -115,10 +145,10 @@ p_edit() {
 
 	local store new
 	store="$(load)"
-	get "$name" <<< "$store" > "$temp_dir/e"
+	j_get "$name" <<< "$store" > "$temp_dir/e"
 	"${EDITOR:-vi}" "$temp_dir/e"
 	new="$(<"$temp_dir/e")"
-	set "$name" "$new" <<< "$store" | save
+	j_set "$name" "$new" <<< "$store" | save
 }
 
 p_list() {
@@ -160,7 +190,9 @@ commands:
   g name len  generate
   i name      insert
   l           list
+  m from to   move
   p name      print
+  x from to   diff commits (for debugging)
 
 toplevel options:
   -h  display usage
@@ -180,13 +212,20 @@ while (($#)); do
 	g) cmd=p_gen; break ;;
 	i) cmd=p_insert; break ;;
 	l) cmd=p_list; break ;;
+	m) cmd=p_mv; break ;;
 	p) cmd=p_print; break ;;
+	x) cmd=p_diff; break ;;
 	-c) cancel=1; shift ;;
 	-h) usage; exit ;;
 	-*) dief 'invalid argument: %s' "$1" ;;
 	*) dief 'invalid command: %s' "$1" ;;
 	esac
 done
+
+if [[ -z "$cmd" ]]; then
+	usage
+	exit 1
+fi
 
 cleanup() {
 	if [[ -n "$temp_dir" ]]; then

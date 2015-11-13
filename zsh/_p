@@ -20,8 +20,9 @@ _p_cmd() {
 		'g:generate'
 		'i:insert'
 		'l:list'
+		'm:move'
 		'p:print'
-		'x:add to clipboard'
+		'x:diff'
 	)
 	_describe -t commands 'command' sub "$@"
 }
@@ -42,7 +43,9 @@ _p() {
 			'*::pwgen options' ;;
 		i) _arguments '1::entry name' ;;
 		l) ;;
+		m) _arguments '1:: :_p_entry' '2::entry name' ;;
 		p) _arguments '1:: :_p_entry' ;;
+		x) _arguments '1::from commit' '2::to commit' ;;
 		*) _message 'invalid command' ;;
 		esac
 	fi

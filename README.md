@@ -8,17 +8,15 @@ commands:
   g name len  generate
   i name      insert
   l           list
+  m from to   move
   p name      print
+  x from to   diff commits (for debugging)
 
 toplevel options:
   -h  display usage
 
 g options:
   --  pass rest of arguments to pwgen
-  -f  overwrite
-
-i options:
-  -f  overwrite
 ```
 
 # Environment
