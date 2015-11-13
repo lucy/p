@@ -10,7 +10,7 @@ commands:
   l           list
   m from to   move
   p name      print
-  x from to   diff commits (for debugging)
+  x ref ref   diff commits (for debugging)
 
 toplevel options:
   -h  display usage
