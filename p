@@ -194,6 +194,22 @@ i options:
 EOF
 }
 
+cancel=0
+while (($#)); do
+	case "$1" in
+	c) cmd=p_create; break ;;
+	d) cmd=p_delete; break ;;
+	e) cmd=p_edit; break ;;
+	g) cmd=p_gen; break ;;
+	i) cmd=p_insert; break ;;
+	l) cmd=p_list; break ;;
+	p) cmd=p_print; break ;;
+	-c) cancel=1; shift ;;
+	-h) usage; exit ;;
+	-*) dief 'invalid argument: %s' "$1" ;;
+	*) dief 'invalid command: %s' "$1" ;;
+	esac
+done
 
 cleanup() {
 	if [[ -n "$temp_dir" ]]; then
@@ -205,26 +221,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-cmd_init() {
-	temp_dir="$(mktemp -d)"
-	if ((cancel)); then
-		gpg_opts+=(--pinentry-mode cancel)
-	fi
-}
+temp_dir="$(mktemp -d)"
+if ((cancel)); then
+	gpg_opts+=(--pinentry-mode cancel)
+fi
 
-cancel=0
-while (($#)); do
-	case "$1" in
-	c) shift; cmd_init; p_create "$@"; break ;;
-	d) shift; cmd_init; p_delete "$@"; break ;;
-	e) shift; cmd_init; p_edit "$@"; break ;;
-	g) shift; cmd_init; p_gen "$@"; break ;;
-	i) shift; cmd_init; p_insert "$@"; break ;;
-	l) shift; cmd_init; p_list "$@"; break ;;
-	p) shift; cmd_init; p_print "$@"; break ;;
-	-c) cancel=1; shift ;;
-	-h) usage; break ;;
-	-*) dief 'invalid argument: %s' "$1" ;;
-	*) dief 'invalid command: %s' "$1" ;;
-	esac
-done
+shift # shift away command name
+"$cmd" "$@"
