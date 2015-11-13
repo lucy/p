@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+
+err() { notify-send 'p' 'Something bad happened :('; }
+trap err ERR
+
+win="$(xdotool getactivewindow)"
+key="$(p l | sort | dmenu "$@")" || exit
+if [[ -n "$key" ]]; then
+	pw="$(p p "$key" | head -n1)"
+	xdotool type --window "$win" --clearmodifiers -- "$pw"
+fi
