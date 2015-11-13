@@ -171,7 +171,7 @@ p_gen() {
 
 usage() {
 	cat >&2 <<EOF
-Usage: p [option ...] command [option ...] [argument ...]
+usage: p [option ...] command [option ...] [argument ...]
 
 commands:
   c           create db
