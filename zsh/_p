@@ -43,10 +43,11 @@ _p() {
 			'*::pwgen options' \
 			;;
 		i) _arguments '1:: :_p_entry' \
-			'-f::overwrite existing entries'\
+			'-f::overwrite existing entries' \
 			;;
 		l) ;;
 		p) _arguments '1:: :_p_entry' ;;
+		*) _message 'invalid command' ;;
 		esac
 	fi
 }
