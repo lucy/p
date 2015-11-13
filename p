@@ -214,9 +214,9 @@ done
 cleanup() {
 	if [[ -n "$temp_dir" ]]; then
 		rm -rf "$temp_dir" || {
-		log 'something bad happened!'
-		logf 'couldn''t remove temp dir at %s' "$temp_dir"
-	}
+			log 'something bad happened!'
+			logf 'couldn''t remove temp dir at %s' "$temp_dir"
+		}
 	fi
 }
 trap cleanup EXIT
