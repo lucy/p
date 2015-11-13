@@ -38,13 +38,9 @@ _p() {
 		c) _message 'no more arguments' ;;
 		d) _arguments '1:: :_p_entry' ;;
 		e) _arguments '1:: :_p_entry' ;;
-		g) _arguments '1:: :_p_entry' '2::password length' \
-			'-f::overwrite existing entries' \
-			'*::pwgen options' \
-			;;
-		i) _arguments '1:: :_p_entry' \
-			'-f::overwrite existing entries' \
-			;;
+		g) _arguments '1::entry name' '2::password length' \
+			'*::pwgen options' ;;
+		i) _arguments '1::entry name' ;;
 		l) ;;
 		p) _arguments '1:: :_p_entry' ;;
 		*) _message 'invalid command' ;;

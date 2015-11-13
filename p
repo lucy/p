@@ -34,7 +34,7 @@ arg_done() {
 
 arg_z() {
 	if [[ -z "$2" ]]; then
-		dief 'supply a %s' "$1"
+		dief 'missing %s' "$1"
 	fi
 }
 
@@ -64,27 +64,13 @@ p_create() {
 }
 
 p_insert() {
-	local force=0
-	while (($#)); do
-		case "$1" in
-		-f) force=1; shift ;;
-		-*) dief 'invalid argument: %s' "$1" ;;
-		*)
-			if [[ -z "$name" ]]; then
-				name="$1"
-			else
-				die 'too many arguments'
-			fi
-			shift
-			;;
-		esac
-	done
-
+	local name="$1"
+	shift
 	arg_z name "$name"
 
 	local store pw
 	store="$(load)"
-	if ((!force)) && get "$name" &>/dev/null <<< "$store"; then
+	if get "$name" >/dev/null <<< "$store"; then
 		die 'entry already exists'
 	fi
 	if [[ -t 0 ]]; then
@@ -141,11 +127,10 @@ p_list() {
 }
 
 p_gen() {
-	local force=0 name length
+	local name length
 	while (($#)); do
 		case "$1" in
 		--) shift; break ;;
-		-f) force=1; shift ;;
 		-*) dief 'invalid option: %s' "$1" ;;
 		*)
 			if [[ -z "$name" ]]; then
@@ -161,12 +146,7 @@ p_gen() {
 	done
 	arg_z name "$name"
 	arg_z length "$length"
-
-	arg=()
-	if ((force)); then
-		arg+=(-f)
-	fi
-	pwgen -s "$@" "$length" 1 | p_insert "${arg[@]}" "$name"
+	pwgen -s "$@" "$length" 1 | p_insert "$name"
 }
 
 usage() {
@@ -187,10 +167,7 @@ toplevel options:
 
 g options:
   --  pass rest of arguments to pwgen
-  -f  overwrite
 
-i options:
-  -f  overwrite
 EOF
 }
 
