@@ -25,6 +25,7 @@ die() { log "$@"; exit 1; }
 dief() { logf "$@"; exit 1; }
 print() { printf '%s' "$@"; }
 git_p() { git -C "$p_dir" "$@"; }
+gpg_p() { gpg2 "${gpg_opts[@]}" "$@"; }
 
 arg_done() {
 	if (($#)); then
@@ -43,12 +44,10 @@ j_get() { jshon -Q -e "$1" -u; }
 j_set() { jshon -Q -s "$2" -i "$1"; }
 j_del() { jshon -Q -d "$1"; }
 
-load() {
-	gpg2 "${gpg_opts[@]}" --decrypt "$p_store"
-}
+load() { gpg_p --decrypt "$p_store"; }
 
 save() {
-	gpg2 "${gpg_opts[@]}" --encrypt --output "$temp_dir/store"
+	gpg_p --encrypt --output "$temp_dir/store"
 	mv "$temp_dir/store" "$p_store"
 	git_p add "$p_store"
 	git_p commit -m '' --allow-empty-message
@@ -68,7 +67,6 @@ p_insert() {
 	local name="$1"
 	shift
 	arg_z name "$name"
-
 	local store pw
 	store="$(load)"
 	if j_get "$name" >/dev/null <<< "$store"; then
@@ -90,14 +88,12 @@ p_delete() {
 	arg_z name "$name"
 	shift
 	arg_done "$@"
-
 	local store
 	store="$(load)"
 	if ! j_get "$name" <<< "$store" &>/dev/null; then
 		die 'no such entry'
 	fi
-	store="$(j_del "$name" <<< "$store")"
-	save <<< "$store"
+	j_del "$name" <<< "$store" | save
 }
 
 p_mv() {
@@ -106,7 +102,6 @@ p_mv() {
 	arg_z to "$to"
 	shift 2
 	arg_done "$@"
-
 	local store pw
 	store="$(load)"
 	if j_get "$to" >/dev/null <<< "$store"; then
@@ -118,12 +113,12 @@ p_mv() {
 
 p_diff() {
 	local from="$1" to="$2"
-	arg_z from\ commit "$from"
-	arg_z to\ commit "$to"
+	arg_z 'from commit' "$from"
+	arg_z 'to commit' "$to"
 	shift 2
 	arg_done "$@"
-	git_p cat-file blob "$from:store" | gpg2 "${gpg_opts[@]}" --decrypt > "$temp_dir/from"
-	git_p cat-file blob "$to:store" | gpg2 "${gpg_opts[@]}" --decrypt > "$temp_dir/to"
+	git_p cat-file blob "$from:store" | gpg_p --decrypt > "$temp_dir/from"
+	git_p cat-file blob "$to:store" | gpg_p --decrypt > "$temp_dir/to"
 	git --no-pager diff --color=auto --no-ext-diff --no-index \
 		"$temp_dir/from" "$temp_dir/to"
 }
@@ -133,7 +128,6 @@ p_print() {
 	arg_z name "$name"
 	shift
 	arg_done "$@"
-
 	load | j_get "$name"
 }
 
@@ -142,7 +136,6 @@ p_edit() {
 	arg_z name "$name"
 	shift
 	arg_done "$@"
-
 	local store new
 	store="$(load)"
 	j_get "$name" <<< "$store" > "$temp_dir/e"
@@ -227,6 +220,10 @@ if [[ -z "$cmd" ]]; then
 	exit 1
 fi
 
+if ((cancel)); then
+	gpg_opts+=(--pinentry-mode cancel)
+fi
+
 cleanup() {
 	if [[ -n "$temp_dir" ]]; then
 		rm -rf "$temp_dir" || {
@@ -236,11 +233,7 @@ cleanup() {
 	fi
 }
 trap cleanup EXIT
-
 temp_dir="$(mktemp -d)"
-if ((cancel)); then
-	gpg_opts+=(--pinentry-mode cancel)
-fi
 
 shift # shift away command name
 "$cmd" "$@"
