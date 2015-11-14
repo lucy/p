@@ -23,7 +23,6 @@ log() { printf '%s: %s\n' 'p' "$1" 1>&2; }
 logf() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; }
 die() { log "$@"; exit 1; }
 dief() { logf "$@"; exit 1; }
-print() { printf '%s' "$@"; }
 git_p() { git -C "$p_dir" "$@"; }
 gpg_p() { gpg2 "${gpg_opts[@]}" "$@"; }
 
