@@ -80,3 +80,7 @@ while IFS= read -r n; do pass show "$n" | p i "$n"; done
 * mktemp
 * pwgen
 * xclip
+
+# `dmenu_p`
+Autotypes a password selected with dmenu using xdotool.
+`dmenu_p [dmenu opts ...]`

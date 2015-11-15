@@ -26,17 +26,8 @@ dief() { logf "$@"; exit 1; }
 git_p() { git -C "$p_dir" "$@"; }
 gpg_p() { gpg2 "${gpg_opts[@]}" "$@"; }
 
-arg_done() {
-	if (($#)); then
-		die 'too many arguments'
-	fi
-}
-
-arg_z() {
-	if [[ -z "$2" ]]; then
-		dief 'missing %s' "$1"
-	fi
-}
+arg_done() { if (($#)); then die 'too many arguments'; fi; }
+arg_z() { if [[ -z "$2" ]]; then dief 'missing %s' "$1"; fi; }
 
 init() { jshon -Q -n object | save; }
 j_get() { jshon -Q -e "$1" -u; }
