@@ -83,4 +83,6 @@ while IFS= read -r n; do pass show "$n" | p i "$n"; done
 
 # `dmenu_p`
 Autotypes a password selected with dmenu using xdotool.
-`dmenu_p [dmenu opts ...]`
+```
+dmenu_p [dmenu opt ...]
+```
