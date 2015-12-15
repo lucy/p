@@ -24,7 +24,6 @@ temp_dir() {
 	if [[ -z "$temp_dir" ]]; then
 		temp_dir="$(mktemp -d)"
 	fi
-	printf '%s' "$temp_dir"
 }
 
 cleanup() {
@@ -41,24 +40,20 @@ trap cleanup EXIT
 
 log() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; }
 die() { log "$@"; exit 1; }
-git_p() { git -C "$p_dir" "$@"; }
-gpg_p() { gpg2 "${gpg_opts[@]}" "$@"; }
 
 j_get() { jshon -Q -e "$1" -u; }
 j_set() { jshon -Q -s "$2" -i "$1"; }
 j_del() { jshon -Q -d "$1"; }
 
 load() {
-	gpg_p --decrypt "$p_store"
+	gpg2 "${gpg_opts[@]}" --decrypt "$p_store"
 }
 
 save() {
-	local tmp
-	tmp="$(temp_dir)"
-	gpg_p --encrypt --output "$tmp/store"
-	mv "$tmp/store" "$p_store"
-	git_p add "$p_store"
-	git_p commit -m '' --allow-empty-message
+	rm "$p_store" # this is in git anyway
+	gpg2 "${gpg_opts[@]}" --encrypt --output "$p_store"
+	git -C "$p_dir" add "$p_store"
+	git -C "$p_dir" commit -m 'update'
 }
 
 p_create() {
@@ -66,7 +61,7 @@ p_create() {
 		die 'store already exists at %s' "$p_store"
 		exit 1
 	fi
-	git_p init
+	git -C "$p_dir" init
 	jshon -Q -n object | save
 }
 
@@ -117,11 +112,12 @@ p_print() {
 p_edit() {
 	local name="$1"; shift 1
 	local store new tmp
-	tmp="$(temp_dir)"
+	temp_dir # create temp_dir
+	tmp="$temp_dir/edit"
 	store="$(load)"
-	j_get "$name" <<< "$store" > "$tmp/e"
-	"${EDITOR:-vi}" "$tmp/e"
-	new="$(<"$tmp/e")"
+	j_get "$name" <<< "$store" > "$tmp"
+	"${EDITOR:-vi}" "$tmp"
+	new="$(<"$tmp")"
 	j_set "$name" "$new" <<< "$store" | save
 }
 
@@ -134,6 +130,21 @@ p_gen() {
 	pwgen -s "$@" "$length" 1 | p_insert "$name"
 }
 
+load_commit() {
+	git -C "$p_dir" cat-file blob "$1:store" |
+		gpg2 "${gpg_opts[@]}" --decrypt > "$2"
+}
+
+p_diff() {
+	local from="$1" to="$2"; shift 2
+	local tmp
+	temp_dir # create temp_dir
+	load_commit "$from" "$temp_dir/from"
+	load_commit "$to" "$temp_dir/to"
+	git --no-pager diff --color=auto --no-ext-diff --no-index \
+		"$temp_dir/from" "$temp_dir/to"
+}
+
 usage() {
 	cat >&2 <<EOF
 usage: p [option ...] command
@@ -142,15 +153,20 @@ commands:
   c                        create db
   d name                   delete
   e name                   edit
-  g name len [option ...]  generate, options passed to pwgen
+  g name len [option ...]  generate
   i name                   insert
   l                        list
   m from to                move
   p name                   print
+  x from to                git diff
 
 options:
-  -h                       display usage
-  -g option                add gpg option
+  -h         display usage
+  -g option  add gpg option
+
+notes:
+  e, x  WARNING: these write your passwords to a path from "\$(mktemp -d)"
+  g     options are passed to pwgen
 EOF
 }
 
@@ -164,6 +180,7 @@ while (($#)); do
 	l) cmd=p_list ;;
 	m) cmd=p_mv ;;
 	p) cmd=p_print ;;
+	x) cmd=p_diff ;;
 	esac
 
 	if [[ -n "$cmd" ]]; then

@@ -5,15 +5,20 @@ commands:
   c                        create db
   d name                   delete
   e name                   edit
-  g name len [option ...]  generate, options passed to pwgen
+  g name len [option ...]  generate
   i name                   insert
   l                        list
   m from to                move
   p name                   print
+  x from to                git diff
 
 options:
-  -h                       display usage
-  -g option                add gpg option
+  -h         display usage
+  -g option  add gpg option
+
+notes:
+  e, x  WARNING: these write your passwords to a path from "$(mktemp -d)"
+  g     options are passed to pwgen
 ```
 
 # Environment
