@@ -131,7 +131,6 @@ p_list() {
 
 p_gen() {
 	local name="$1" length="$2"; shift 2
-	if [[ "$1" = '--' ]]; then shift 1; fi
 	pwgen -s "$@" "$length" 1 | p_insert "$name"
 }
 
@@ -157,14 +156,21 @@ EOF
 
 while (($#)); do
 	case "$1" in
-	c) cmd=p_create; break ;;
-	d) cmd=p_delete; break ;;
-	e) cmd=p_edit; break ;;
-	g) cmd=p_gen; break ;;
-	i) cmd=p_insert; break ;;
-	l) cmd=p_list; break ;;
-	m) cmd=p_mv; break ;;
-	p) cmd=p_print; break ;;
+	c) cmd=p_create ;;
+	d) cmd=p_delete ;;
+	e) cmd=p_edit ;;
+	g) cmd=p_gen ;;
+	i) cmd=p_insert ;;
+	l) cmd=p_list ;;
+	m) cmd=p_mv ;;
+	p) cmd=p_print ;;
+	esac
+
+	if [[ -n "$cmd" ]]; then
+		shift 1; break
+	fi
+
+	case "$1" in
 	-g) gpg_opts+=("$2"); shift 2 ;;
 	-h) usage; exit ;;
 	-*) die 'invalid argument: %s' "$1" ;;
@@ -176,4 +182,4 @@ if [[ -z "$cmd" ]]; then
 	exit 1
 fi
 
-shift 1; "$cmd" "$@"
+"$cmd" "$@"
