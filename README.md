@@ -1,22 +1,19 @@
 ```
-usage: p [option ...] command [option ...] [argument ...]
+usage: p [option ...] command
 
 commands:
-  c           create db
-  d name      delete
-  e name      edit
-  g name len  generate
-  i name      insert
-  l           list
-  m from to   move
-  p name      print
-  x ref ref   diff commits (for debugging)
+  c                        create db
+  d name                   delete
+  e name                   edit
+  g name len [option ...]  generate, options passed to pwgen
+  i name                   insert
+  l                        list
+  m from to                move
+  p name                   print
 
-toplevel options:
-  -h  display usage
-
-g options:
-  --  pass rest of arguments to pwgen
+options:
+  -h                       display usage
+  -g option                add gpg option
 ```
 
 # Environment

@@ -3,7 +3,7 @@
 
 _p_entry() {
 	local IFS=$'\n' entries
-	entries=($(p -c l 2>/dev/null | sort))
+	entries=($(p -g --pinentry-mode -g cancel l 2>/dev/null | sort))
 	if ((${#entries})); then
 		_values 'entry name' $entries
 	else
