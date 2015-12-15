@@ -81,7 +81,6 @@ while IFS= read -r n; do pass show "$n" | p i "$n"; done
 * [jshon](https://github.com/keenerd/jshon)
 * mktemp
 * pwgen
-* xclip
 
 # `dmenu_p`
 Autotypes a password selected with dmenu using xdotool.
