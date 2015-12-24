@@ -17,7 +17,7 @@ options:
   -g option  add gpg option
 
 notes:
-  e, x  WARNING: these write your passwords to a path from "$(mktemp -d)"
+  e, x  WARNING: these write your passwords to "$(mktemp -d)"
   g     options are passed to pwgen
 ```
 
@@ -87,3 +87,8 @@ Autotypes a password selected with dmenu using xdotool.
 ```
 dmenu_p [dmenu opt ...]
 ```
+
+# Why does it use bash
+POSIX sh lacks some features required to implement this program correctly.
+These include trap [...] EXIT to avoid leaving sensitive temporary files and
+arrays for correctly building the gpg parameter list.

@@ -4,6 +4,31 @@ set -e
 set -o pipefail
 umask 077
 
+usage() {
+	cat >&2 <<EOF
+usage: p [option ...] command
+
+commands:
+  c                        create db
+  d name                   delete
+  e name                   edit
+  g name len [option ...]  generate
+  i name                   insert
+  l                        list
+  m from to                move
+  p name                   print
+  x from to                git diff
+
+options:
+  -h         display usage
+  -g option  add gpg option
+
+notes:
+  e, x  WARNING: these write your passwords to "\$(mktemp -d)"
+  g     options are passed to pwgen
+EOF
+}
+
 p_dir="${P_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/p}"
 p_store="$p_dir/store"
 gpg_opts=(--quiet --yes --batch)
@@ -143,31 +168,6 @@ p_diff() {
 	load_commit "$to" "$temp_dir/to"
 	git --no-pager diff --color=auto --no-ext-diff --no-index \
 		"$temp_dir/from" "$temp_dir/to"
-}
-
-usage() {
-	cat >&2 <<EOF
-usage: p [option ...] command
-
-commands:
-  c                        create db
-  d name                   delete
-  e name                   edit
-  g name len [option ...]  generate
-  i name                   insert
-  l                        list
-  m from to                move
-  p name                   print
-  x from to                git diff
-
-options:
-  -h         display usage
-  -g option  add gpg option
-
-notes:
-  e, x  WARNING: these write your passwords to a path from "\$(mktemp -d)"
-  g     options are passed to pwgen
-EOF
 }
 
 while (($#)); do
