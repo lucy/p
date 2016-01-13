@@ -92,3 +92,11 @@ dmenu_p [dmenu opt ...]
 POSIX sh lacks some features required to implement this program correctly.
 These include trap [...] EXIT to avoid leaving sensitive temporary files and
 arrays for correctly building the gpg parameter list.
+
+# Limitations
+Unlike `pass`, `p` stores all entries in a single file. This means you have to
+decrypt all your passwords to access just one of them, which can reduce
+security if you run your decryption operations on e.g. a yubikey. The upside to
+this is that your entry names are not leaked.
+
+TODO: optionally encrypt+base64 entries in the store?
