@@ -79,8 +79,8 @@ while IFS= read -r n; do pass show "$n" | p i "$n"; done
 * git
 * gpg2
 * [jshon](https://github.com/keenerd/jshon)
-* mktemp
-* pwgen
+* mktemp (optional)
+* pwgen (optional)
 
 # `dmenu_p`
 Autotypes a password selected with dmenu using xdotool.
