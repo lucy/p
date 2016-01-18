@@ -5,28 +5,28 @@ set -o pipefail
 umask 077
 
 usage() {
-	cat >&2 <<EOF
-usage: p [option ...] command
+	cat >&2 <<-EOF
+	usage: p [opt ...] cmd
 
-commands:
-  c                        create db
-  d name                   delete
-  e name                   edit
-  g name len [option ...]  generate
-  i name                   insert
-  l                        list
-  m from to                move
-  p name                   print
-  x from to                git diff
+	commands:
+	  c                       create db
+	  d name                  delete
+	  e name                  edit
+	  g name [len [opt ...]]  generate
+	  i name                  insert
+	  l                       list
+	  m from to               move
+	  p name                  print
+	  x from to               git diff
 
-options:
-  -h         display usage
-  -g option  add gpg option
+	options:
+	  -h      display usage
+	  -g opt  add gpg option
 
-notes:
-  e, x  WARNING: these write your passwords to "\$(mktemp -d)"
-  g     options are passed to pwgen
-EOF
+	notes:
+	  e, x  WARNING: these will write your passwords to "\$(mktemp -d)"
+	  g     length defaults to 32, options are passed to pwgen
+	EOF
 }
 
 p_dir="${P_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/p}"
@@ -91,7 +91,8 @@ p_create() {
 }
 
 p_insert() {
-	local name="$1"; shift 1
+	local name="$1"
+	if ! shift; then die 'missing name'; fi
 	local store pw
 	store="$(load)"
 	if j_get "$name" >/dev/null <<< "$store"; then
@@ -109,7 +110,8 @@ p_insert() {
 }
 
 p_delete() {
-	local name="$1"; shift 1
+	local name="$1"
+	if ! shift; then die 'missing name'; fi
 	local store
 	store="$(load)"
 	if ! j_get "$name" <<< "$store" &>/dev/null; then
@@ -119,7 +121,8 @@ p_delete() {
 }
 
 p_mv() {
-	local from="$1" to="$2"; shift 2
+	local from="$1" to="$2"
+	if ! shift 2; then die 'missing from or to'; fi
 	local store pw
 	store="$(load)"
 	if j_get "$to" >/dev/null <<< "$store"; then
@@ -130,12 +133,14 @@ p_mv() {
 }
 
 p_print() {
-	local name="$1"; shift 1
+	local name="$1"
+	if ! shift; then die 'missing name'; fi
 	load | j_get "$name"
 }
 
 p_edit() {
-	local name="$1"; shift 1
+	local name="$1"
+	if ! shift; then die 'missing name'; fi
 	local store new tmp
 	temp_dir # create temp_dir
 	tmp="$temp_dir/edit"
@@ -151,7 +156,10 @@ p_list() {
 }
 
 p_gen() {
-	local name="$1" length="$2"; shift 2
+	local name="$1"
+	if ! shift; then die 'missing name'; fi
+	local length="$1"
+	if ! shift; then length=32; fi
 	pwgen -s "$@" "$length" 1 | p_insert "$name"
 }
 
@@ -184,7 +192,8 @@ while (($#)); do
 	esac
 
 	if [[ -n "$cmd" ]]; then
-		shift 1; break
+		shift
+		break
 	fi
 
 	case "$1" in
@@ -196,7 +205,7 @@ while (($#)); do
 done
 
 if [[ -z "$cmd" ]]; then
-	exit 1
+	die 'missing command'
 fi
 
 "$cmd" "$@"
