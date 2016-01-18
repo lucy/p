@@ -1,24 +1,24 @@
 ```
-usage: p [option ...] command
+usage: p [opt ...] cmd
 
 commands:
-  c                        create db
-  d name                   delete
-  e name                   edit
-  g name len [option ...]  generate
-  i name                   insert
-  l                        list
-  m from to                move
-  p name                   print
-  x from to                git diff
+  c                       create db
+  d name                  delete
+  e name                  edit
+  g name [len [opt ...]]  generate
+  i name                  insert
+  l                       list
+  m from to               move
+  p name                  print
+  x from to               git diff
 
 options:
-  -h         display usage
-  -g option  add gpg option
+  -h      display usage
+  -g opt  add gpg option
 
 notes:
-  e, x  WARNING: these write your passwords to "$(mktemp -d)"
-  g     options are passed to pwgen
+  e, x  WARNING: these will write your passwords to "$(mktemp -d)"
+  g     length defaults to 32, options are passed to pwgen
 ```
 
 # Environment
