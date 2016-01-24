@@ -90,8 +90,8 @@ dmenu_p [dmenu opt ...]
 
 # Why does it use bash
 POSIX sh lacks some features required to implement this program correctly.
-These include trap [...] EXIT to avoid leaving sensitive temporary files and
-arrays for correctly building the gpg parameter list.
+These include trap [...] EXIT to avoid leaving sensitive temporary files
+around, and arrays for correctly building the gpg parameter list.
 
 # Limitations
 Unlike `pass`, `p` stores all entries in a single file. This means you have to
