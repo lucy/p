@@ -112,12 +112,12 @@ p_list() { load | jshon -k; }
 while :; do
 	case "$1" in
 	'') break ;;
-	c) p_create "$@"; exit;;
-	d) p_delete "$@"; exit;;
-	i) p_insert "$@"; exit;;
-	l) p_list   "$@"; exit;;
-	m) p_move   "$@"; exit;;
-	p) p_print  "$@"; exit;;
+	c) shift; p_create "$@"; exit;;
+	d) shift; p_delete "$@"; exit;;
+	i) shift; p_insert "$@"; exit;;
+	l) shift; p_list   "$@"; exit;;
+	m) shift; p_move   "$@"; exit;;
+	p) shift; p_print  "$@"; exit;;
 	-h) usage; exit ;;
 	-g) gpg_opts="$gpg_opts $2"; shift 2 ;;
 	-*) die 'invalid argument: %s' "$1" ;;
