@@ -70,13 +70,7 @@ while IFS= read -r n; do pass show "$n" | p i "$n"; done
 * gpg2
 * [jshon](https://github.com/keenerd/jshon)
 
-# `dmenu_p`
-Autotypes a password selected with dmenu using xdotool.
-```
-dmenu_p [dmenu opt ...]
-```
-
-# Limitations
+# Design/Limitations
 Unlike `pass`, `p` stores all entries in a single file. This means you have to
 decrypt all your passwords to access just one of them, which can reduce
 security if you run your decryption operations on e.g. a yubikey. The upside to
