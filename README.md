@@ -76,4 +76,5 @@ decrypt all your passwords to access just one of them, which can reduce
 security if you run your decryption operations on e.g. a yubikey. The upside to
 this is that your entry names are not leaked.
 
-TODO: optionally encrypt+base64 entries in the store?
+TODO?: optionally encrypt+base64 entries in the store
+TODO?: switch to jq
