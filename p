@@ -1,211 +1,128 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 set -e
-set -o pipefail
 umask 077
 
 usage() {
 	cat >&2 <<-EOF
-	usage: p [opt ...] cmd
+	usage: p [option ...] command
 
 	commands:
-	  c                       create db
-	  d name                  delete
-	  e name                  edit
-	  g name [len [opt ...]]  generate
-	  i name                  insert
-	  l                       list
-	  m from to               move
-	  p name                  print
-	  x from to               git diff
+	  c          create db
+	  l          list
+	  p name     print
+	  i name     insert
+	  d name     delete
+	  m from to  rename
 
 	options:
-	  -h      display usage
-	  -g opt  add gpg option
-
-	notes:
-	  e, x  WARNING: these will write your passwords to "\$(mktemp -d)"
-	  g     length defaults to 32, options are passed to pwgen
+	  -h  show help
 	EOF
 }
 
 p_dir="${P_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/p}"
 p_store="$p_dir/store"
-gpg_opts=(--quiet --yes --batch)
-temp_dir=
+gpg_opts='--quiet --yes --batch'
 
-if [[ -r "$p_dir/config" ]]; then
+if [ -r "$p_dir/config" ]; then
 	# shellcheck disable=SC1090
 	. "$p_dir/config"
 fi
 
-if [[ -n "$P_KEY" ]]; then
-	gpg_opts+=('--recipient' "$P_KEY")
-else
-	gpg_opts+=('--default-recipient-self')
-fi
-
-temp_dir() {
-	if [[ -z "$temp_dir" ]]; then
-		temp_dir="$(mktemp -d)"
+gpg() {
+	if [ -n "$P_KEY" ]; then
+		# shellcheck disable=SC2086
+		gpg2 $gpg_opts --recipient "$P_KEY" "$@"
+	else
+		# shellcheck disable=SC2086
+		gpg2 $gpg_opts --default-recipient-self "$P_KEY" "$@"
 	fi
 }
 
-cleanup() {
-	if [[ -n "$temp_dir" ]]; then
-		rm -rf "$temp_dir"
-		if [[ -e "$temp_dir" ]]; then
-			log 'could not remove temporary directory: %s' "$temp_dir"
-			log 'please make sure it is deleted to avoid data leaks'
-			exit 1
-		fi
-	fi
-}
-trap cleanup EXIT
-
-log() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; }
-die() { log "$@"; exit 1; }
+die() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; exit 1; }
 
 j_get() { jshon -Q -e "$1" -u; }
 j_set() { jshon -Q -s "$2" -i "$1"; }
 j_del() { jshon -Q -d "$1"; }
 
-load() {
-	gpg2 "${gpg_opts[@]}" --decrypt "$p_store"
-}
+load() { gpg --decrypt "$p_store"; }
 
 save() {
 	rm "$p_store" # this is in git anyway
-	gpg2 "${gpg_opts[@]}" --encrypt --output "$p_store"
+	gpg --encrypt --output "$p_store"
 	git -C "$p_dir" add "$p_store"
 	git -C "$p_dir" commit -m 'update'
 }
 
 p_create() {
-	if [[ -e "$p_store" ]]; then
+	if [ -e "$p_store" ]; then
 		die 'store already exists at %s' "$p_store"
-		exit 1
 	fi
 	git -C "$p_dir" init
 	jshon -Q -n object | save
 }
 
 p_insert() {
-	local name="$1"
+	name="$1"
 	if ! shift; then die 'missing name'; fi
-	local store pw
 	store="$(load)"
-	if j_get "$name" >/dev/null <<< "$store"; then
+	if printf '%s' "$store" | j_get "$name" >/dev/null; then
 		die 'entry already exists'
 	fi
-	if [[ -t 0 ]]; then
+	if [ -t 0 ]; then
 		stty -echo
-		read -r -p 'entry: ' pw
+		read -r 'entry: ' pw
 		stty echo
-		echo
+		printf '\n'
 	else
 		pw="$(cat)"
 	fi
-	j_set "$name" "$pw" <<< "$store" | save
+	printf '%s' "$store" | j_set "$name" "$pw" | save
 }
 
 p_delete() {
-	local name="$1"
+	name="$1"
 	if ! shift; then die 'missing name'; fi
-	local store
 	store="$(load)"
-	if ! j_get "$name" <<< "$store" &>/dev/null; then
+	if ! printf '%s' "$store" | j_get "$name" >/dev/null 1>&2; then
 		die 'no such entry'
 	fi
-	j_del "$name" <<< "$store" | save
+	printf '%s' "$store" | j_del "$name" | save
 }
 
-p_mv() {
-	local from="$1" to="$2"
+p_move() {
+	from="$1" to="$2"
 	if ! shift 2; then die 'missing from or to'; fi
-	local store pw
 	store="$(load)"
-	if j_get "$to" >/dev/null <<< "$store"; then
+	if printf '%s' "$store" | j_get "$to" >/dev/null; then
 		die 'to already exists'
 	fi
-	pw="$(j_get "$from" <<< "$store")"
-	j_del "$from" <<< "$store" | j_set "$to" "$pw" | save
+	pw="$(printf '%s' "$store" | j_get "$from")"
+	printf '%s' "$store" | j_del "$from" | j_set "$to" "$pw" | save
 }
 
 p_print() {
-	local name="$1"
+	name="$1"
 	if ! shift; then die 'missing name'; fi
 	load | j_get "$name"
 }
 
-p_edit() {
-	local name="$1"
-	if ! shift; then die 'missing name'; fi
-	local store new tmp
-	temp_dir # create temp_dir
-	tmp="$temp_dir/edit"
-	store="$(load)"
-	j_get "$name" <<< "$store" > "$tmp"
-	"${EDITOR:-vi}" "$tmp"
-	new="$(<"$tmp")"
-	j_set "$name" "$new" <<< "$store" | save
-}
+p_list() { load | jshon -k; }
 
-p_list() {
-	load | jshon -k
-}
-
-p_gen() {
-	local name="$1"
-	if ! shift; then die 'missing name'; fi
-	local length="$1"
-	if ! shift; then length=32; fi
-	pwgen -s "$@" "$length" 1 | p_insert "$name"
-}
-
-load_commit() {
-	git -C "$p_dir" cat-file blob "$1:store" |
-		gpg2 "${gpg_opts[@]}" --decrypt > "$2"
-}
-
-p_diff() {
-	local from="$1" to="$2"; shift 2
-	local tmp
-	temp_dir # create temp_dir
-	load_commit "$from" "$temp_dir/from"
-	load_commit "$to" "$temp_dir/to"
-	git --no-pager diff --color=auto --no-ext-diff --no-index \
-		"$temp_dir/from" "$temp_dir/to"
-}
-
-while (($#)); do
+while :; do
 	case "$1" in
-	c) cmd=p_create ;;
-	d) cmd=p_delete ;;
-	e) cmd=p_edit ;;
-	g) cmd=p_gen ;;
-	i) cmd=p_insert ;;
-	l) cmd=p_list ;;
-	m) cmd=p_mv ;;
-	p) cmd=p_print ;;
-	x) cmd=p_diff ;;
-	esac
-
-	if [[ -n "$cmd" ]]; then
-		shift
-		break
-	fi
-
-	case "$1" in
-	-g) gpg_opts+=("$2"); shift 2 ;;
+	'') break ;;
+	c) p_create "$@"; exit;;
+	d) p_delete "$@"; exit;;
+	i) p_insert "$@"; exit;;
+	l) p_list   "$@"; exit;;
+	m) p_move   "$@"; exit;;
+	p) p_print  "$@"; exit;;
 	-h) usage; exit ;;
+	-g) gpg_opts="$gpg_opts $2"; shift 2 ;;
 	-*) die 'invalid argument: %s' "$1" ;;
 	*) die 'invalid command: %s' "$1" ;;
 	esac
 done
 
-if [[ -z "$cmd" ]]; then
-	die 'missing command'
-fi
-
-"$cmd" "$@"
+die 'missing command'

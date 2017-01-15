@@ -1,37 +1,28 @@
 ```
-usage: p [opt ...] cmd
+usage: p [option ...] command
 
 commands:
-  c                       create db
-  d name                  delete
-  e name                  edit
-  g name [len [opt ...]]  generate
-  i name                  insert
-  l                       list
-  m from to               move
-  p name                  print
-  x from to               git diff
+  c          create db
+  l          list
+  p name     print
+  i name     insert
+  d name     delete
+  m from to  rename
 
 options:
-  -h      display usage
-  -g opt  add gpg option
-
-notes:
-  e, x  WARNING: these will write your passwords to "$(mktemp -d)"
-  g     length defaults to 32, options are passed to pwgen
+  -h  show help
 ```
 
 # Environment
 * `P_DIR`: config and store dir (default: `${XDG_CONFIG_DIR:-$HOME/.config}/p`)
-* `P_KEY`: gnupg key id
-* `EDITOR`: used for `p e` (edit entry)
+* `P_KEY`: gpg key id
 
 # Files
 * `$P_DIR/config`: sourced for environment variables
 * `$P_DIR/store`: the store
 
 # Format
-The store is a simple JSON object encrypted with gpg.
+The store is a JSON object encrypted with gpg.
 
 #### Initialise the store:
 ```
@@ -66,7 +57,7 @@ entry:
 }
 ```
 
-# Migrate (don't!)
+# Migrate (probably don't)
 ```bash
 ( cd "${PASSWORD_STORE:-$HOME/.password-store}/" && \
   find . \( -name .git -o -name .gpg-id \) -prune -o -type f -print ) | \
@@ -75,23 +66,15 @@ while IFS= read -r n; do pass show "$n" | p i "$n"; done
 ```
 
 # Dependencies
-* bash
 * git
 * gpg2
 * [jshon](https://github.com/keenerd/jshon)
-* mktemp (optional)
-* pwgen (optional)
 
 # `dmenu_p`
 Autotypes a password selected with dmenu using xdotool.
 ```
 dmenu_p [dmenu opt ...]
 ```
-
-# Why does it use bash
-POSIX sh lacks some features required to implement this program correctly.
-These include trap [...] EXIT to avoid leaving sensitive temporary files
-around, and arrays for correctly building the gpg parameter list.
 
 # Limitations
 Unlike `pass`, `p` stores all entries in a single file. This means you have to

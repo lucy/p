@@ -3,7 +3,7 @@
 
 _p_entry() {
 	local IFS=$'\n' entries
-	entries=($(p -g --pinentry-mode -g cancel l 2>/dev/null | sort))
+	entries=($(p -g '--pinentry-mode cancel' l 2>/dev/null | sort))
 	if ((${#entries})); then
 		_values 'entry name' $entries
 	else
@@ -15,14 +15,11 @@ _p_cmd() {
 	local -a sub
 	sub=(
 		'c:create db'
-		'd:delete'
-		'e:edit'
-		'g:generate'
-		'i:insert'
 		'l:list'
-		'm:move'
 		'p:print'
-		'x:diff'
+		'i:insert'
+		'd:delete'
+		'm:move'
 	)
 	_describe -t commands 'command' sub "$@"
 }
@@ -37,15 +34,11 @@ _p() {
 	if [[ "$state" == args ]]; then
 		case $line[1] in
 		c) _message 'no more arguments' ;;
-		d) _arguments '1:: :_p_entry' ;;
-		e) _arguments '1:: :_p_entry' ;;
-		g) _arguments '1::entry name' '2::password length' \
-			'*::pwgen options' ;;
-		i) _arguments '1::entry name' ;;
-		l) ;;
-		m) _arguments '1:: :_p_entry' '2::entry name' ;;
+		l) _message 'no more arguments' ;;
 		p) _arguments '1:: :_p_entry' ;;
-		x) _arguments '1::from commit' '2::to commit' ;;
+		i) _arguments '1::entry name' ;;
+		d) _arguments '1:: :_p_entry' ;;
+		m) _arguments '1:: :_p_entry' '2::entry name' ;;
 		*) _message 'invalid command' ;;
 		esac
 	fi
