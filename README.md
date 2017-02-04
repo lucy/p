@@ -57,26 +57,7 @@ entry:
 }
 ```
 
-# Migrate (probably don't)
-```bash
-( cd "${PASSWORD_STORE:-$HOME/.password-store}/" && \
-  find . \( -name .git -o -name .gpg-id \) -prune -o -type f -print ) | \
-sed -e 's/^\.\///' -e 's/\.gpg$//' | \
-while IFS= read -r n; do pass show "$n" | p i "$n"; done
-```
-
 # Dependencies
 * git
 * gpg2
-* [jshon](https://github.com/keenerd/jshon)
-
-# Design/Limitations
-Unlike `pass`, `p` stores all entries in a single file. This means you have to
-decrypt all your passwords to access just one of them, which can reduce
-security if you run your decryption operations on e.g. a yubikey. The upside to
-this is that your entry names are not leaked.
-
-
-TODO?: optionally encrypt+base64 entries in the store
-
-TODO?: switch to jq as it seems more popular
+* jq

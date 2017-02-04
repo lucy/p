@@ -7,8 +7,7 @@ err() { notify-send 'p' 'Something bad happened :('; }
 trap err ERR
 
 win="$(xdotool getactivewindow)"
-list="$(p l)" || exit
-key="$(sort <<< "$list" | dmenu "$@")" || exit
+key="$(p l | dmenu "$@")" || exit
 if [[ -n "$key" ]]; then
 	pw="$(p p "$key" | head -n1)"
 	xdotool type --delay 0 --window "$win" --clearmodifiers -- "$pw"

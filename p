@@ -41,9 +41,12 @@ gpg() {
 
 die() { fmt="$1"; shift; printf "%s: $fmt\n" 'p' "$@" 1>&2; exit 1; }
 
-j_get() { jshon -Q -e "$1" -u; }
-j_set() { jshon -Q -s "$2" -i "$1"; }
-j_del() { jshon -Q -d "$1"; }
+# shellcheck disable=SC2016
+j_get() { jq '.[$key]' --arg key "$1" -r; }
+# shellcheck disable=SC2016
+j_set() { jq '.[$key] = $val' --arg key "$1" --arg val "$2"; }
+# shellcheck disable=SC2016
+j_del() { jq 'del(.[$key])' --arg key "$1"; }
 
 load() { gpg --decrypt "$p_store"; }
 
@@ -59,7 +62,7 @@ p_create() {
 		die 'store already exists at %s' "$p_store"
 	fi
 	git -C "$p_dir" init
-	jshon -Q -n object | save
+	printf '{}\n' | save
 }
 
 p_insert() {
@@ -107,7 +110,7 @@ p_print() {
 	load | j_get "$name"
 }
 
-p_list() { load | jshon -k; }
+p_list() { load | jq 'keys | .[]' -r; }
 
 while :; do
 	case "$1" in
