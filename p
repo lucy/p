@@ -8,7 +8,7 @@ usage() {
 	usage: p [option ...] command
 
 	commands:
-	  c          create db
+	  c          create
 	  l          list
 	  p name     print
 	  i name     insert
@@ -51,9 +51,9 @@ j_del() { jq 'del(.[$key])' --arg key "$1"; }
 load() { gpg --decrypt "$p_store"; }
 
 save() {
-	rm "$p_store" # this is in git anyway
-	gpg --encrypt --output "$p_store"
-	git -C "$p_dir" add "$p_store"
+	rm "$p_store" && # this is in git anyway
+	gpg --encrypt --output "$p_store" &&
+	git -C "$p_dir" add "$p_store" &&
 	git -C "$p_dir" commit -m 'update'
 }
 
@@ -61,24 +61,25 @@ p_create() {
 	if [ -e "$p_store" ]; then
 		die 'store already exists at %s' "$p_store"
 	fi
-	git -C "$p_dir" init
+	git -C "$p_dir" init &&
 	printf '{}\n' | save
 }
 
 p_insert() {
 	name="$1"
 	if ! shift; then die 'missing name'; fi
-	store="$(load)"
+	store="$(load)" || return 1
 	if printf '%s' "$store" | j_get "$name" >/dev/null; then
 		die 'entry already exists'
 	fi
 	if [ -t 0 ]; then
-		stty -echo
-		read -r 'entry: ' pw
-		stty echo
-		printf '\n'
+		stty -echo &&
+		read -r 'entry: ' pw &&
+		stty echo &&
+		printf '\n' ||
+		return 1
 	else
-		pw="$(cat)"
+		pw="$(cat)" || return 1
 	fi
 	printf '%s' "$store" | j_set "$name" "$pw" | save
 }
@@ -86,7 +87,7 @@ p_insert() {
 p_delete() {
 	name="$1"
 	if ! shift; then die 'missing name'; fi
-	store="$(load)"
+	store="$(load)" || return 1
 	if ! printf '%s' "$store" | j_get "$name" >/dev/null 1>&2; then
 		die 'no such entry'
 	fi
@@ -96,11 +97,11 @@ p_delete() {
 p_move() {
 	from="$1" to="$2"
 	if ! shift 2; then die 'missing from or to'; fi
-	store="$(load)"
+	store="$(load)" || return 1
 	if printf '%s' "$store" | j_get "$to" >/dev/null; then
 		die 'to already exists'
 	fi
-	pw="$(printf '%s' "$store" | j_get "$from")"
+	pw="$(printf '%s' "$store" | j_get "$from")" &&
 	printf '%s' "$store" | j_del "$from" | j_set "$to" "$pw" | save
 }
 

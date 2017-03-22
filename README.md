@@ -2,7 +2,7 @@
 usage: p [option ...] command
 
 commands:
-  c          create db
+  c          create
   l          list
   p name     print
   i name     insert
