@@ -3,9 +3,6 @@
 set -e
 set -o pipefail
 
-err() { notify-send 'p' 'Something bad happened :('; }
-trap err ERR
-
 win="$(xdotool getactivewindow)"
 key="$(p l | dmenu "$@")" || exit
 if [[ -n "$key" ]]; then
